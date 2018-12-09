@@ -1,0 +1,22 @@
+{
+  "name": "v-pop",
+  "version": "1.0.0",
+  "description": "tooltip's made with popper.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/borisbutenko/v-pop.git"
+  },
+  "keywords": [
+    "v-pop"
+  ],
+  "author": "Boris",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/borisbutenko/v-pop/issues"
+  },
+  "homepage": "https://github.com/borisbutenko/v-pop#readme"
+}
