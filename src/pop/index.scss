@@ -1,0 +1,14 @@
+.v-pop-popper {
+  padding: 5px;
+  background-color: #FFF;
+  border: 1px solid #000;
+  border-radius: 4px;
+
+  &[data-state="hidden"] {
+    display: none;
+  }
+
+  &[data-state="visible"] {
+    display: block;
+  }
+}

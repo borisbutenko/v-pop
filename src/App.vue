@@ -1,28 +1,42 @@
 <template>
-  <div id="app">
-    <img src="./assets/logo.png">
-    <HelloWorld/>
-  </div>
+<main id="app">
+  <button v-pop="bold_text">
+    <pre>v-pop="bold_text"</pre>
+  </button>
+  <br>
+  <br>
+  <button v-pop.click="bold_text">
+    <pre>v-pop.click="bold_text"</pre>
+  </button>
+  <br>
+  <br>
+  <button v-pop="options">
+    <pre>v-pop="options"</pre>
+  </button>
+  <br>
+  <br>
+  <b>_vm.$data</b>:
+  <pre>{{ $data }}</pre>
+  <b>_vm.$data.options.content</b>:
+  <pre>{{ $data.options.content }}</pre>
+</main>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld'
-
 export default {
   name: 'App',
-  components: {
-    HelloWorld
+
+  data() {
+    return {
+      hw: 'Hello World!',
+      bold_text: '<b>123</b>',
+      options: {
+        content: function() {
+          return `<h1>${this.hw}</h1>`
+        },
+        trigger: 'click'
+      }
+    }
   }
 }
 </script>
-
-<style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
