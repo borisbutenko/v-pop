@@ -2,8 +2,8 @@ import { get_options } from './utils'
 import Tooltip from './Tooltip'
 
 export default {
-  bind(el, { value, modifiers }, { context }) {
-    el.tooltip = new Tooltip(el, get_options(value, modifiers, context), context)
+  bind(el, { value, modifiers, arg }, { context }) {
+    el.tooltip = new Tooltip(el, get_options(value, { modifiers, arg }, context), context)
   },
 
   inserted(el) {
@@ -14,17 +14,3 @@ export default {
     el.tooltip.destroy()
   }
 }
-
-// export default {
-//   bind(el, { value, modifiers }) {
-//     let options = get_options(value, modifiers)
-//   },
-
-//   inserted() {
-
-//   },
-
-//   unbind() {
-
-//   }
-// }

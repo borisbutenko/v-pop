@@ -23,34 +23,8 @@ class Tooltip {
   set_attributes() {
     this.reference.className = 'v-pop-reference'
     this.reference.dataset.action = this.options.trigger
-    this.reference.dataset.container = `#${this._id}`
-  }
-
-  set_events() {
-    let trigger = this.options.trigger
-
-    switch (trigger) {
-      case 'hover':
-        this.reference.addEventListener('mouseenter', this.show.bind(this), false)
-        this.reference.addEventListener('mouseleave', this.hide.bind(this), false)
-        break
-      case 'click':
-        this.reference.addEventListener('click', () => {
-          if (this.opened) {
-            this.hide()
-          } else {
-            this.show()
-          }
-        }, false)
-        if (!Tooltip.events.has('click')) {
-          document.addEventListener('click', Tooltip.hide_all, false)
-        }
-        break
-      default:
-        break
-    }
-
-    Tooltip.events.add(trigger)
+    this.reference.dataset.state = 'hidden'
+    this.reference.dataset.id = this._id
   }
 
   show() {
@@ -65,6 +39,7 @@ class Tooltip {
     // --- after document click or this method
     setImmediate(() => {
       this.opened = true
+      this.reference.dataset.state = 'visible'
       this._container.dataset.state = 'visible'
       this._vm.$emit('v-pop', this.opened)
     })
@@ -72,15 +47,16 @@ class Tooltip {
 
   hide() {
     this.opened = false
+    this.reference.dataset.state = 'hidden'
     this._container.dataset.state = 'hidden'
     this._vm.$emit('v-pop', this.opened)
   }
 
   init() {
-    this.set_events()
     this.set_attributes()
     this.create_tooltip_container()
     this.init_popper()
+    Tooltip.set_events(this)
     Tooltip.add(this)
   }
 
@@ -106,12 +82,98 @@ class Tooltip {
 
   // --- static methods
 
+  static set_events(instance) {
+    let trigger = instance.options.trigger
+
+    if (Tooltip.events.has(trigger)) {
+      return
+    }
+
+    let container = instance._vm.$root.$el || document.body
+
+    switch (trigger) {
+      case 'hover':
+        container.addEventListener('mouseover', Tooltip.handler_mouseover, false)
+        container.addEventListener('mouseout', Tooltip.handler_mouseout, false)
+        break
+      case 'click':
+        container.addEventListener('click', Tooltip.handler_click, false)
+        if (!Tooltip.events.has('click')) {
+          document.addEventListener('click', ({ target }) => {
+            if (target.closest('.v-pop-reference[data-action="hover"][data-state="visible"]')) {
+              return
+            }
+            Tooltip.hide_all()
+          }, false)
+        }
+        break
+      default:
+        break
+    }
+
+    Tooltip.events.add(trigger)
+  }
+
   static hide_all() {
     for (let instance of Tooltip.instance.values()) {
       if (instance.opened) {
         instance.hide()
       }
     }
+  }
+
+  static handler_click({ target }) {
+    target = target.closest('.v-pop-reference[data-action="click"][data-state="hidden"]')
+    if (!target) {
+      return
+    }
+    let instance = Tooltip.get_instance(target.dataset.id)
+    if (!instance) {
+      return
+    }
+    if (target.dataset.state === 'visible') {
+      instance.hide()
+    } else {
+      instance.show()
+    }
+  }
+
+  static handler_mouseover({ target }) {
+    target = target.closest('.v-pop-reference[data-action="hover"][data-state="hidden"]')
+    if (!target) {
+      return
+    }
+
+    let instance = Tooltip.get_instance(target.dataset.id)
+    if (!instance) {
+      return
+    }
+    if (instance.opened) {
+      return
+    }
+
+    instance.show()
+  }
+
+  static handler_mouseout({ target, toElement }) {
+    let selector = '.v-pop-reference[data-action="hover"][data-state="visible"]'
+
+    target = target.closest(selector)
+    toElement = toElement && toElement.closest(selector)
+
+    if (!target || (toElement && target)) {
+      return
+    }
+
+    let instance = Tooltip.get_instance(target.dataset.id)
+    if (!instance) {
+      return
+    }
+    if (!instance.opened) {
+      return
+    }
+
+    instance.hide()
   }
 
   static add(instance) {
@@ -121,6 +183,10 @@ class Tooltip {
   static remove(instance) {
     // document.body.remove(instance.content)
     Tooltip.instance.delete(instance._id)
+  }
+
+  static get_instance(id) {
+    return Tooltip.instance.get(id)
   }
 
   // --- static getters
